@@ -93,3 +93,48 @@ def text_node_to_html_node(text_node):
             return LeafNode("a", text_node.text, {"href": text_node.url})
         case TextType.IMAGE:
             return LeafNode("img", "", None, {"src": text_node.url})
+
+def split_nodes_from_markdown(old_nodes, delimiter, text_type):
+    new_nodes = list()
+    for node in old_nodes:
+        if not isinstance(node, TextNode):
+            raise Exception("ERROR: INVALID DATA TYPE PASSED INTO SPLIT NODES")
+        
+        if node.text_type != text_type.TEXT or delimiter not in node.text:
+            new_nodes.append(node)
+            continue
+
+
+        if node.text.count(delimiter) % 2 != 0:
+            raise Exception(f"ERROR: ODD AMOUNT OF {delimiter} IN {node}")
+
+        # Begin Splitting up the Text into Nodes
+        collection = []
+        counting = False
+        for split_node in node.text.split():
+            if split_node.startswith(delimiter) and split_node.endswith(delimiter):
+                if collection:
+                    new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+                    collection = []
+                new_nodes.append(TextNode(split_node.strip(delimiter), text_type))
+                continue
+            else:
+                if split_node.startswith(delimiter) and not counting:
+                    new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+                    collection = []
+                    collection.append(split_node.strip(delimiter))
+                    counting = True
+                    continue
+
+                if split_node.endswith(delimiter) and counting:
+                    collection.append(split_node.strip(delimiter))
+                    counting = False
+                    new_nodes.append(TextNode(" ".join(collection), text_type))
+                    collection = []
+                    continue
+
+                if delimiter not in split_node and split_node:
+                    collection.append(split_node)
+        if collection:
+            new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+    return new_nodes
