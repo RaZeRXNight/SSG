@@ -1,4 +1,28 @@
+from enum import Enum
 
+class TextType(Enum):
+    TEXT = ""
+    PLAIN = "plain"
+    BOLD = "b"
+    CODE = "code"
+    LINK = "a"
+    IMAGE = "img"
+
+
+class TextNode():
+    def __init__(self, text, text_type, url=None):
+        self.text = text;
+        self.text_type = text_type;
+        self.url = url;
+
+    def __eq__(self, other):
+        if isinstance(other, TextNode):
+            if [self.text, self.text_type, self.url] == [other.text, other.text_type, other.url]:
+                return True
+        return False
+
+    def __repr__(self):
+        return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
 class HTMLNode():
     def __init__(self, tag=None, value=None, children=None, props=None):
@@ -50,3 +74,22 @@ class ParentNode(HTMLNode):
             raise ValueError("ERROR: NO VALID CHILDREN")
         children_html = "".join([x.to_html() for x in self.children])
         return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
+
+
+def text_node_to_html_node(text_node):
+    if not isinstance(text_node, TextNode):
+        raise Exception("ERROR: OBJECT ENTERED IS NOT A TEXT NODE.")
+
+    match(text_node.text_type):
+        case TextType.TEXT:
+            return LeafNode(None, text_node.text)
+        case TextType.BOLD:
+            return LeafNode("b", text_node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", text_node.text)
+        case TextType.CODE:
+            return LeafNode("code", text_node.text)
+        case TextType.LINK:
+            return LeafNode("a", text_node.text, {"href": text_node.url})
+        case TextType.IMAGE:
+            return LeafNode("img", "", None, {"src": text_node.url})
