@@ -1,4 +1,5 @@
 from enum import Enum
+from re import split;
 
 class TextType(Enum):
     TEXT = ""
@@ -111,16 +112,16 @@ def split_nodes_from_markdown(old_nodes, delimiter, text_type):
         # Begin Splitting up the Text into Nodes
         collection = []
         counting = False
-        for split_node in node.text.split():
+        for split_node in split(r'(\s+)', node.text):
             if split_node.startswith(delimiter) and split_node.endswith(delimiter):
                 if collection:
-                    new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+                    new_nodes.append(TextNode("".join(collection), TextType.TEXT))
                     collection = []
                 new_nodes.append(TextNode(split_node.strip(delimiter), text_type))
                 continue
             else:
                 if split_node.startswith(delimiter) and not counting:
-                    new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+                    new_nodes.append(TextNode("".join(collection), TextType.TEXT))
                     collection = []
                     collection.append(split_node.strip(delimiter))
                     counting = True
@@ -129,12 +130,12 @@ def split_nodes_from_markdown(old_nodes, delimiter, text_type):
                 if split_node.endswith(delimiter) and counting:
                     collection.append(split_node.strip(delimiter))
                     counting = False
-                    new_nodes.append(TextNode(" ".join(collection), text_type))
+                    new_nodes.append(TextNode("".join(collection), text_type))
                     collection = []
                     continue
 
                 if delimiter not in split_node and split_node:
                     collection.append(split_node)
         if collection:
-            new_nodes.append(TextNode(" ".join(collection), TextType.TEXT))
+            new_nodes.append(TextNode("".join(collection), TextType.TEXT))
     return new_nodes
