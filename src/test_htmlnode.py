@@ -2,7 +2,7 @@
 import unittest
 
 from extraction import *
-from htmlnode import HTMLNode, LeafNode, ParentNode, TextType, TextNode, text_node_to_html_node, split_nodes_from_markdown;
+from htmlnode import HTMLNode, LeafNode, ParentNode, TextType, TextNode, text_node_to_html_node, split_nodes_from_markdown, split_nodes_image, split_nodes_link;
 
 # class TestHTMLNode(unittest.TestCase):
 #     def test_results(self):
@@ -65,6 +65,23 @@ class TextExtration(unittest.TestCase):
             "This is text with an [image](https://i.imgur.com/zjjcJKZ.png)"
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+class TextSplit_Nodes(unittest.TestCase):
+    # def test_split_nodes_image1(self):
+    #     matches = split_nodes_image([TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)])
+    #     print(matches)
+    #     # self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    # def test_split_nodes_image2(self):
+    #     matches = split_nodes_image([TextNode("This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)", TextType.TEXT,)])
+    #     print(matches)
+    #     self.assertEqual(4, len(matches))
+
+    def test_split_node_links(self):
+        matches = split_nodes_link([TextNode("This is text with an [image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)])
+        print(matches)
+        self.assertIn(TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), matches)
+
 
 if __name__ == "__main__":
     unittest.main()

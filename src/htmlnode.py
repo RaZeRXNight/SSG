@@ -1,5 +1,6 @@
 from enum import Enum
-from re import split;
+from extraction import extract_markdown_images, extract_markdown_links;
+import re;
 
 class TextType(Enum):
     TEXT = ""
@@ -112,7 +113,7 @@ def split_nodes_from_markdown(old_nodes, delimiter, text_type):
         # Begin Splitting up the Text into Nodes
         collection = []
         counting = False
-        for split_node in split(r'(\s+)', node.text):
+        for split_node in re.split(r'(\s+)', node.text):
             if split_node.startswith(delimiter) and split_node.endswith(delimiter):
                 if collection:
                     new_nodes.append(TextNode("".join(collection), TextType.TEXT))
@@ -138,4 +139,61 @@ def split_nodes_from_markdown(old_nodes, delimiter, text_type):
                     collection.append(split_node)
         if collection:
             new_nodes.append(TextNode("".join(collection), TextType.TEXT))
+    return new_nodes
+
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    split_node_pattern = re.compile(r'(\!(.*?)*(?:\)))')
+    
+    for old_node in old_nodes:
+        if not isinstance(old_node, TextNode):
+            raise Exception("ERROR: INVALID DATA TYPE ENTERED")
+        
+        if not old_node.text_type == TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        
+        split_nodes = list(filter(lambda x: x, re.split(split_node_pattern, old_node.text)))
+        
+        for index, node in enumerate(split_nodes):
+            new_node = None
+            extract = extract_markdown_images(node)
+
+            if extract:
+                new_node = TextNode(extract[0][0], TextType.IMAGE, extract[0][1])
+            else:
+                new_node = TextNode(node, TextType.TEXT, None)
+
+            new_nodes.append(new_node)
+    return new_nodes
+
+node = TextNode(
+    "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+    TextType.TEXT,
+)
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    split_node_pattern = re.compile(r'((?<!\!)\[(.*?)*(?:\)))')
+    
+    for old_node in old_nodes:
+        if not isinstance(old_node, TextNode):
+            raise Exception("ERROR: INVALID DATA TYPE ENTERED")
+        
+        if not old_node.text_type == TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        
+        split_nodes = list(filter(lambda x: x, re.split(split_node_pattern, old_node.text)))
+        
+        for index, node in enumerate(split_nodes):
+            new_node = None
+            extract = extract_markdown_links(node)
+
+            if extract:
+                new_node = TextNode(extract[0][0], TextType.IMAGE, extract[0][1])
+            else:
+                new_node = TextNode(node, TextType.TEXT, None)
+
+            new_nodes.append(new_node)
     return new_nodes
