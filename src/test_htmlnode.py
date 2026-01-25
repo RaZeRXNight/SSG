@@ -2,7 +2,8 @@
 import unittest
 
 from extraction import *
-from htmlnode import HTMLNode, LeafNode, ParentNode, TextType, TextNode, text_node_to_html_node, split_nodes_from_markdown, split_nodes_image, split_nodes_link;
+from htmlnode import HTMLNode, LeafNode, ParentNode, TextType, TextNode;
+from extraction import *;
 
 # class TestHTMLNode(unittest.TestCase):
 #     def test_results(self):
@@ -81,6 +82,12 @@ class TextSplit_Nodes(unittest.TestCase):
         matches = split_nodes_link([TextNode("This is text with an [image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)])
         print(matches)
         self.assertIn(TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), matches)
+        
+    def test_text_to_html_nodes(self):
+        matches = text_to_html_nodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+        for node in matches:
+            print(node)
+        self.assertIn(TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"), matches)
 
 
 if __name__ == "__main__":
