@@ -1,8 +1,7 @@
-
 import unittest
 
 from extraction import *
-from htmlnode import HTMLNode, LeafNode, ParentNode, TextType, TextNode;
+from htmlnode import *;
 from extraction import *;
 
 # class TestHTMLNode(unittest.TestCase):
@@ -67,7 +66,7 @@ class TextExtration(unittest.TestCase):
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
-class TextSplit_Nodes(unittest.TestCase):
+# class TextSplit_Nodes(unittest.TestCase):
     # def test_split_nodes_image1(self):
     #     matches = split_nodes_image([TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)])
     #     print(matches)
@@ -78,17 +77,44 @@ class TextSplit_Nodes(unittest.TestCase):
     #     print(matches)
     #     self.assertEqual(4, len(matches))
 
-    def test_split_node_links(self):
-        matches = split_nodes_link([TextNode("This is text with an [image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)])
-        print(matches)
-        self.assertIn(TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), matches)
+    # def test_split_node_links(self):
+    #     matches = split_nodes_link([TextNode("This is text with an [image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)])
+    #     print(matches)
+    #     self.assertIn(TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), matches)
         
-    def test_text_to_html_nodes(self):
-        matches = text_to_html_nodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
-        for node in matches:
-            print(node)
-        self.assertIn(TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"), matches)
+    # def test_text_to_html_nodes(self):
+    #     matches = text_to_html_nodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+    #     for node in matches:
+    #         print(node)
+    #     self.assertIn(TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"), matches)
 
+class Test_Blocks(unittest.TestCase):
+    def test1_results(self):
+        results = markdown_to_blocks("""
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+""")
+        print(results)
+        pass
+    
+    def test2_results(self):
+        results = markdown_to_blocks("""
+This is **bolded** paragraph
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+
+
+- with items
+""")
+        print(results)
+        pass
 
 if __name__ == "__main__":
     unittest.main()

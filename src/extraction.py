@@ -1,17 +1,53 @@
-from re import findall
+from enum import Enum
+import re 
 from htmlnode import *;
+
+class BlockType(Enum):
+    PARAGRAPH = "p"
+    HEADING = "#"
+    CODE = "`"
+    QUOTE = "\""
+    UNORDERED_LIST = ""
+    ORDERED_LIST = ""
 
 def extract_markdown_images(text):
     """
     Returns a Tuple (Image Alt, Image Link)
     """
-    return findall(r'\!\[(.*?)\]\((.*?)\)', text)
+    return re.findall(r'\!\[(.*?)\]\((.*?)\)', text)
 
 def extract_markdown_links(text):
     """
     Returns a Tuple (Image Alt, Image Link)
     """
-    return findall(r'(?<!\!)\[(.*?)\]\((.*?)\)', text)
+    return re.findall(r'(?<!\!)\[(.*?)\]\((.*?)\)', text)
+
+def block_to_block_type(old_block):
+    """
+    Retrieves the Block Type of a Block stripped from Markdown.
+    """
+    if re.match(r'^#*\ ', old_block):
+        return BlockType.HEADING
+    elif old_block.startswith("```") and old_block.endswith("```"):
+        return BlockType.CODE
+    elif re.match(r'(?m)^(\>\ )'):
+        return BlockType.QUOTE
+    elif re.match(r'(?m)(-\. )', old_block, re.MULTILINE):
+        return BlockType.UNORDERED_LIST
+    elif re.match(r'(\d\. )', old_block):
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
+
+def markdown_to_blocks(markdown):
+    split_md, new_blocks = markdown.split("\n\n"), []
+
+    for line in split_md:
+        new_line = line.strip()
+        if not new_line:
+            continue
+        new_blocks.append(new_line)
+
+    return new_blocks
 
 def text_to_html_nodes(text):
     first_nodes = [TextNode(text, TextType.TEXT, None)] # We turn the Text into a Text Node.
@@ -19,7 +55,6 @@ def text_to_html_nodes(text):
     # We're going to cycle through all the TextTypes we have covered, and convert the first_nodes into it's relevant nodes.
 
     first_nodes = split_nodes_link(split_nodes_image(first_nodes))
-
     
     for num in [TextType.BOLD, TextType.ITALIC, TextType.CODE]:
         first_nodes = split_nodes_from_markdown(first_nodes, num.value, num)
